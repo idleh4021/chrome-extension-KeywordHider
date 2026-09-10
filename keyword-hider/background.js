@@ -49,3 +49,43 @@ function flashBadge(text, color) {
   setTimeout(() => chrome.action.setBadgeText({ text: '' }), 1500);
 }
 
+// ---------- 탭별 임시 비활성화 ----------
+const pausedTabs = new Set();
+
+// 서비스 워커가 재시작돼도 세션 동안은 유지되도록 storage.session에 백업
+chrome.storage.session.get({ pausedTabIds: [] }, (res) => {
+  (res.pausedTabIds || []).forEach((id) => pausedTabs.add(id));
+});
+
+function persistPausedTabs() {
+  chrome.storage.session.set({ pausedTabIds: Array.from(pausedTabs) });
+}
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'get-page-paused') {
+    const tabId = sender.tab && sender.tab.id;
+    sendResponse({ paused: tabId != null && pausedTabs.has(tabId) });
+    return; // 동기 응답
+  }
+
+  if (message.type === 'toggle-tab-pause') {
+    const { tabId, paused } = message;
+    if (paused) {
+      pausedTabs.add(tabId);
+    } else {
+      pausedTabs.delete(tabId);
+    }
+    persistPausedTabs();
+    chrome.tabs.sendMessage(tabId, { type: 'set-paused', paused }).catch(() => {});
+    sendResponse({ ok: true });
+  }
+
+  if (message.type === 'get-tab-pause-state') {
+    sendResponse({ paused: pausedTabs.has(message.tabId) });
+  }
+});
+
+// 탭이 닫히면 목록 정리
+chrome.tabs.onRemoved.addListener((tabId) => {
+  if (pausedTabs.delete(tabId)) persistPausedTabs();
+});

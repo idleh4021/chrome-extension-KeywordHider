@@ -2,6 +2,7 @@
   let keywords = [];
   let caseSensitive = false;
   let enabled = true;
+  let pagePaused = false;
   let maskFieldsEnabled = true;
   let observer = null;
 
@@ -134,8 +135,21 @@
     nodes.forEach((node) => maskTextNode(node, regex));
   }
 
-  function scanAll() {
-    if (!enabled) return;
+    // 페이지 일시정지 시 현재 마스킹된 것들을 원래대로 되돌림
+  function unmaskAllInPage() {
+    document.querySelectorAll('.ks-hidden').forEach((span) => {
+      const original = span.dataset.original || '';
+      span.replaceWith(document.createTextNode(original));
+    });
+    if (document.body) document.body.normalize();
+
+    document
+      .querySelectorAll('input[data-ks-masked="true"], textarea[data-ks-masked="true"]')
+      .forEach((el) => removeFieldMask(el));
+  }
+
+function scanAll() {
+    if (!enabled || pagePaused) return;
     const regex = buildRegex();
     if (!regex || !document.body) return;
     walkAndMask(document.body, regex);
@@ -246,9 +260,10 @@
       el.dispatchEvent(new Event('input', { bubbles: true }));
     }
   }
+  
 
   function onFieldInput(e) {
-    if (!enabled || !maskFieldsEnabled) return;
+    if (!enabled || !maskFieldsEnabled || pagePaused) return;
     const el = e.target;
     if (!isMaskableField(el)) return;
     const regex = buildRegex();
@@ -272,7 +287,7 @@
   function startObserving() {
     if (observer || !document.body) return;
     observer = new MutationObserver((mutations) => {
-      if (!enabled) return;
+      if (!enabled || pagePaused) return;
       const regex = buildRegex();
       if (!regex) return;
       for (const m of mutations) {
@@ -314,11 +329,14 @@
         enabled = res.enabled !== false;
         maskFieldsEnabled = res.maskFields !== false;
 
-        if (enabled) {
-          scanAll();
-          startObserving();
-        }
-        revealPage(); // 마스킹(또는 마스킹 불필요 판단) 완료 후 화면 표시
+        chrome.runtime.sendMessage({ type: 'get-page-paused' }, (pauseRes) => {
+          pagePaused = !!(pauseRes && pauseRes.paused);
+          if (enabled && !pagePaused) {
+            scanAll();
+            startObserving();
+          }
+          revealPage();
+        });
       }
     );
   }
@@ -352,6 +370,18 @@
           removeFieldMask(el);
         });
       }
+    }
+  });
+
+    chrome.runtime.onMessage.addListener((message) => {
+    if (message.type !== 'set-paused') return;
+    pagePaused = !!message.paused;
+    if (pagePaused) {
+      unmaskAllInPage();
+      stopObserving();
+    } else if (enabled) {
+      scanAll();
+      startObserving();
     }
   });
 
