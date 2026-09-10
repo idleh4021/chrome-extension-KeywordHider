@@ -6,10 +6,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const resetBtn = document.getElementById('reset-btn');
   const caseCheckbox = document.getElementById('case-sensitive');
   const masterCheckbox = document.getElementById('master-enabled');
+  const maskFieldsCheckbox = document.getElementById('mask-fields');
 
   function render() {
     chrome.storage.local.get(
-      { keywords: [], hiddenCount: 0, caseSensitive: false, enabled: true },
+      { keywords: [], hiddenCount: 0, caseSensitive: false, enabled: true, maskFields: true },
       (res) => {
         listEl.innerHTML = '';
         if (res.keywords.length === 0) {
@@ -37,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
         counterEl.textContent = res.hiddenCount.toLocaleString();
         caseCheckbox.checked = res.caseSensitive;
         masterCheckbox.checked = res.enabled;
+        maskFieldsCheckbox.checked = res.maskFields;
       }
     );
   }
@@ -68,6 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   masterCheckbox.addEventListener('change', () => {
     chrome.storage.local.set({ enabled: masterCheckbox.checked });
+  });
+
+  maskFieldsCheckbox.addEventListener('change', () => {
+    chrome.storage.local.set({ maskFields: maskFieldsCheckbox.checked });
   });
 
   resetBtn.addEventListener('click', () => {

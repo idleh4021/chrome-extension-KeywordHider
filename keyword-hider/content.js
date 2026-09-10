@@ -2,7 +2,31 @@
   let keywords = [];
   let caseSensitive = false;
   let enabled = true;
+  let maskFieldsEnabled = true;
   let observer = null;
+
+  // ---------- 초기 로딩 시 원문이 잠깐 보이는 것(FOUC) 방지 ----------
+  // document_start 시점에 페이지를 우선 숨기고, 마스킹 처리가 끝난 직후에만 보여줍니다.
+  const HIDE_STYLE_ID = 'ks-initial-hide';
+
+  function hidePage() {
+    if (document.getElementById(HIDE_STYLE_ID)) return;
+    const style = document.createElement('style');
+    style.id = HIDE_STYLE_ID;
+    style.textContent = 'html { visibility: hidden !important; }';
+    (document.documentElement || document).appendChild(style);
+  }
+
+  function revealPage() {
+    clearTimeout(revealSafetyTimer);
+    const style = document.getElementById(HIDE_STYLE_ID);
+    if (style) style.remove();
+  }
+
+  hidePage();
+  // 안전장치: 어떤 이유로든(오류, 저장소 지연 등) 마스킹이 끝나지 않아도
+  // 페이지가 계속 숨겨진 채로 남지 않도록 최대 2초 후 강제로 표시합니다.
+  const revealSafetyTimer = setTimeout(revealPage, 2000);
 
   // ---------- 유틸 ----------
   function escapeRegExp(str) {
@@ -115,7 +139,7 @@
     const regex = buildRegex();
     if (!regex || !document.body) return;
     walkAndMask(document.body, regex);
-    scanFields(document.body, regex);
+    if (maskFieldsEnabled) scanFields(document.body, regex);
   }
 
   // ---------- input / textarea 마스킹 ----------
@@ -224,7 +248,7 @@
   }
 
   function onFieldInput(e) {
-    if (!enabled) return;
+    if (!enabled || !maskFieldsEnabled) return;
     const el = e.target;
     if (!isMaskableField(el)) return;
     const regex = buildRegex();
@@ -257,7 +281,7 @@
             maskTextNode(node, regex);
           } else if (node.nodeType === Node.ELEMENT_NODE) {
             walkAndMask(node, regex);
-            scanFields(node, regex);
+            if (maskFieldsEnabled) scanFields(node, regex);
           }
         });
         // 텍스트가 직접 수정된 경우 (예: innerText 갱신)
@@ -283,15 +307,18 @@
   // ---------- 초기화 ----------
   function init() {
     chrome.storage.local.get(
-      { keywords: [], caseSensitive: false, enabled: true },
+      { keywords: [], caseSensitive: false, enabled: true, maskFields: true },
       (res) => {
         keywords = res.keywords || [];
         caseSensitive = !!res.caseSensitive;
         enabled = res.enabled !== false;
+        maskFieldsEnabled = res.maskFields !== false;
+
         if (enabled) {
           scanAll();
           startObserving();
         }
+        revealPage(); // 마스킹(또는 마스킹 불필요 판단) 완료 후 화면 표시
       }
     );
   }
@@ -312,6 +339,18 @@
         startObserving();
       } else {
         stopObserving();
+      }
+    }
+    if (changes.maskFields) {
+      maskFieldsEnabled = changes.maskFields.newValue !== false;
+      if (maskFieldsEnabled) {
+        const regex = buildRegex();
+        scanFields(document.body, regex);
+      } else {
+        // 옵션을 끄면 현재 마스킹돼 있던 필드를 모두 즉시 해제
+        document.querySelectorAll('input[data-ks-masked="true"], textarea[data-ks-masked="true"]').forEach((el) => {
+          removeFieldMask(el);
+        });
       }
     }
   });
