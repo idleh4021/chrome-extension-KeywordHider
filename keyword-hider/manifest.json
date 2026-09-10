@@ -4,7 +4,6 @@
   "version": "1.0.0",
   "description": "화면 공유나 원격 제어 중 설정한 단어를 자동으로 가려주는 프라이버시 보호 확장 프로그램",
   "permissions": ["storage", "contextMenus"],
-  "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js"
   },
