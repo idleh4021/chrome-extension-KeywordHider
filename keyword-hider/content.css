@@ -1,0 +1,48 @@
+.ks-hidden {
+  display: inline-block;
+  background: #202225;
+  color: #202225;
+  border-radius: 3px;
+  padding: 0 3px;
+  cursor: pointer;
+  user-select: none;
+  letter-spacing: 1px;
+  transition: background-color 0.15s ease, outline 0.15s ease;
+}
+
+.ks-hidden:hover {
+  background: #35373c;
+}
+
+.ks-hidden.ks-revealed {
+  background: transparent;
+  color: inherit;
+  outline: 1px dashed #f39c12;
+  outline-offset: 1px;
+  cursor: pointer;
+  user-select: text;
+}
+
+/* input의 텍스트 자체를 점(dot)으로 표시 (크로미움 계열 지원) */
+input[data-ks-masked="true"] {
+  -webkit-text-security: disc !important;
+}
+
+/* textarea는 -webkit-text-security를 지원하지 않아, 위에 덮는 오버레이로 마스킹 처리 */
+.ks-field-overlay {
+  position: absolute;
+  display: none;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 6px;
+  box-sizing: border-box;
+  background: #202225;
+  color: #cfcfcf;
+  border-radius: 3px;
+  letter-spacing: 2px;
+  font-size: 14px;
+  cursor: text;
+  z-index: 2147483647;
+  user-select: none;
+}
+

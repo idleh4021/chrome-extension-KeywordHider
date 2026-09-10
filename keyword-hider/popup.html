@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<style>
+  body {
+    width: 240px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+    background: #1e1f22;
+    color: #e6e6e6;
+    margin: 0;
+    padding: 16px;
+  }
+  h2 {
+    font-size: 15px;
+    margin: 0 0 12px 0;
+  }
+  .status-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #2b2d31;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+  }
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+  }
+  .switch input { display: none; }
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #4a4d53;
+    border-radius: 20px;
+    transition: 0.2s;
+  }
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 14px; width: 14px;
+    left: 3px; bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.2s;
+  }
+  input:checked + .slider { background-color: #5865f2; }
+  input:checked + .slider:before { transform: translateX(16px); }
+  .count-box {
+    text-align: center;
+    padding: 10px 0 4px 0;
+  }
+  .count-num {
+    font-size: 24px;
+    font-weight: 700;
+    color: #5865f2;
+  }
+  .count-label {
+    font-size: 12px;
+    color: #9aa0a6;
+  }
+  button#open-options {
+    width: 100%;
+    margin-top: 12px;
+    padding: 8px;
+    border: none;
+    border-radius: 6px;
+    background: #35373c;
+    color: #e6e6e6;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  button#open-options:hover { background: #45474e; }
+</style>
+</head>
+<body>
+  <h2>🛡️ Keyword Hider</h2>
+  <div class="status-row">
+    <span>마스킹 기능</span>
+    <label class="switch">
+      <input type="checkbox" id="master-toggle" />
+      <span class="slider"></span>
+    </label>
+  </div>
+  <div class="count-box">
+    <div class="count-num" id="counter">0</div>
+    <div class="count-label">누적 숨김 횟수</div>
+  </div>
+  <button id="open-options">단어 관리 열기</button>
+  <script src="popup.js"></script>
+</body>
+</html>

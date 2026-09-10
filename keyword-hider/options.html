@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>Keyword Hider - 설정</title>
+<style>
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Malgun Gothic", sans-serif;
+    background: #1e1f22;
+    color: #e6e6e6;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  h1 {
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+  p.desc {
+    color: #9aa0a6;
+    font-size: 13px;
+    margin-top: 0;
+    margin-bottom: 20px;
+  }
+  .card {
+    background: #2b2d31;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .row {
+    display: flex;
+    gap: 8px;
+  }
+  input[type="text"] {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #3f4147;
+    background: #1e1f22;
+    color: #e6e6e6;
+    font-size: 14px;
+  }
+  button {
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: none;
+    background: #5865f2;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  button:hover { background: #4752c4; }
+  button.danger { background: #d83c3e; }
+  button.danger:hover { background: #b8302f; }
+  ul#keyword-list {
+    list-style: none;
+    padding: 0;
+    margin: 14px 0 0 0;
+    max-height: 240px;
+    overflow-y: auto;
+  }
+  ul#keyword-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #1e1f22;
+    padding: 8px 10px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    font-size: 14px;
+  }
+  .del-btn {
+    background: transparent;
+    color: #d83c3e;
+    padding: 2px 8px;
+    font-size: 13px;
+  }
+  .del-btn:hover { background: #3a2020; }
+  .empty-msg {
+    color: #72767d;
+    font-size: 13px;
+    padding: 8px 0;
+  }
+  .counter-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .counter-num {
+    font-size: 28px;
+    font-weight: 700;
+    color: #5865f2;
+  }
+  label.option-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    margin-top: 12px;
+    color: #b5bac1;
+  }
+</style>
+</head>
+<body>
+  <h1>🛡️ Keyword Hider 설정</h1>
+  <p class="desc">등록한 단어는 화면에서 자동으로 가려지며, 클릭하면 임시로 표시됩니다.</p>
+
+  <div class="card">
+    <div class="row">
+      <input type="text" id="keyword-input" placeholder="가릴 단어 입력 후 Enter" />
+      <button id="add-btn">추가</button>
+    </div>
+    <ul id="keyword-list"></ul>
+    <label class="option-row">
+      <input type="checkbox" id="case-sensitive" />
+      대소문자 구분
+    </label>
+    <label class="option-row">
+      <input type="checkbox" id="master-enabled" />
+      마스킹 기능 전체 켜기
+    </label>
+  </div>
+
+  <div class="card counter-box">
+    <div>
+      <div style="font-size:13px;color:#9aa0a6;">누적 숨김 횟수</div>
+      <div class="counter-num" id="counter">0</div>
+    </div>
+    <button class="danger" id="reset-btn">초기화</button>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

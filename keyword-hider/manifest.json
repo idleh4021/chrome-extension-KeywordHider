@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Keyword Hider",
+  "version": "1.0.0",
+  "description": "화면 공유나 원격 제어 중 설정한 단어를 자동으로 가려주는 프라이버시 보호 확장 프로그램",
+  "permissions": ["storage"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Keyword Hider"
+  },
+  "options_page": "options.html"
+}
